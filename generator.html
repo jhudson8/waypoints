@@ -1,0 +1,89 @@
+<html>
+	<head>
+		<style>
+			body {
+				padding: 0;
+				margin: 0;
+			}
+			table {
+				width 100%;
+				border-spacing: 0;
+    			border-collapse: collapse;
+			}
+			td {
+				padding: 20px;
+				border: solid 1px #dddddd;
+				border-left-width: 0;
+				border-top-width: 0;
+			}
+			.identifier {
+				color: #ccc;
+				font-size: 8pt;
+				float: right;
+			}
+			.key-code {
+				float: left;
+				font-weight: bold;
+			}
+
+			@media print {
+				table tr td {
+					page-break-inside: avoid;
+				}
+				.page-break {
+					page-break-before: always;
+				}
+			}
+		</style>
+		<script type="text/javascript" src="lib/underscore.js"></script>
+		<script type="text/javascript" src="lib/zepto.js"></script>
+		<script>
+$(document).ready(function() {
+	var numCodes = 40,
+		numPerRow = 4,
+		rowsPerPage = 4,
+		qrDim = 140,
+		linkUrl = _.template('https://dl.dropboxusercontent.com/u/6589453/treasure_hunt/index.html#code/<%= code %>'),
+		qrUrl = _.template('http://api.qrserver.com/v1/create-qr-code/?data=<%= link %>&size=<%= dim %>x<%= dim %>'),
+		template = _.template('<td align="center"><img src="<%= url %>"><br><span class="key-code">code: <%= code %></span><span class="identifier"><%= id %></span></td>');
+		
+	$.ajax({
+  		dataType: "json",
+  		url: 'data.json',
+  		success: function(data) {
+  		
+			var html = '<table><tr>',
+				rowCount = 0;
+
+			for (var i=0; i<data.points.length; i++) {
+				var id = data.points[i][0],
+					code = data.points[i][1];
+				id = Math.abs(id);
+
+				if (i > 0 && i%numPerRow === 0) {
+					var className = (++rowCount % rowsPerPage == 0) ? 'page-break' : '';
+					html += '</tr></table><table class="' + className +  '"></tr>';
+				}
+				var context = {
+					id: id,
+					code: code,
+					dim: qrDim
+				};
+				context.link = encodeURIComponent(linkUrl(context));
+				context.url = qrUrl(context);
+				html += template(context);
+			}
+			html += '</tr></table>';
+			$('.container').html(html);
+  		
+  		}
+	});
+});
+		</script>
+	</head>
+	<body>
+			<div class="container">
+
+			</div>
+	</body>
+</html>

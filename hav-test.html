@@ -1,0 +1,77 @@
+<html>
+	<head>
+		<script type="text/javascript" src="lib/underscore.js"></script>
+		<script type="text/javascript" src="lib/zepto.js"></script>
+
+		<script>
+Number.prototype.toRad = function() {
+	return this * Math.PI / 180;
+}
+Number.prototype.toDeg = function() {  // convert radians to degrees (signed)
+  return this * 180 / Math.PI;
+}
+Number.prototype.toBrng = function() {  // convert radians to degrees (as bearing: 0...360)
+  return (this.toDeg()+360) % 360;
+}
+var deg2Rad = function(value){
+	// converts numeric degress to radians
+	return value * Math.PI / 180;
+}
+var rad2Deg = function(value){
+	//convert radians to degress
+	return value * 180 / Math.PI;
+}
+
+
+function bearing(from, to) {
+	var lat1 = from[0],
+		lat2 = to[0],
+		lon1 = from[1],
+		lon2 = to[1],
+		dLat = (lat2-lat1).toRad(),
+		dLon = (lon2-lon1).toRad();
+
+     //difference in the phi of latitudinal coordinates
+     var dPhi = Math.log(Math.tan(deg2Rad(lat2) / 2 + Math.PI / 4) / Math.tan(deg2Rad(lat1) / 2 + Math.PI / 4));
+ 
+     //we need to recalculate $dLon if it is greater than pi
+     if(Math.abs(dLon) > Math.PI) {
+          if(dLon > 0) {
+               dLon = (2 * Math.PI - dLon) * -1;
+          }
+          else {
+               dLon = 2 * Math.PI+ dLon;
+          }
+     }
+     //return the angle, normalized
+     return (rad2Deg(Math.atan2(dLon, dPhi)) + 360) % 360;
+}
+
+var positions = {
+	center: [37.297181, -77.761046],
+	area: [
+		[37.315067, -77.761647, "12:00"],
+		[37.315682, -77.732894, "1:30"],
+		[37.299161, -77.727400, "3:00"],
+		[37.283319, -77.735211, "4:30"],
+		[37.280655, -77.759673, "6:00"],
+		[37.281270, -77.778040, "7:30"],
+		[37.298273, -77.792374, "9:00"],
+		[37.313839, -77.790228, "10:30"]
+	]
+}
+
+var ctr = positions.center;
+for (var i=0; i<positions.area.length; i++) {
+	var edge = positions.area[i];
+	console.log(edge[2] + ' -> ' + bearing(ctr, edge));;
+}
+
+		</script>
+
+	</head>
+
+	<body style="margin: 0">
+
+	</body>
+</html>
