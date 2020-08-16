@@ -1,256 +1,32 @@
 <!DOCTYPE html>
 <html>
-	<!-- http://goo.gl/21soeQ -->
-	<head>
-		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
-
-		<script type="text/javascript" src="lib/underscore.js"></script>
-		<script type="text/javascript" src="lib/zepto.js"></script>
-		<script type="text/javascript" src="lib/backbone.js"></script>
-		<script type="text/javascript" src="lib/app.js"></script>
-		<link href="lib/bootstrap.min.css" rel="stylesheet">
-		<style>
-			html {
-				font-family: ariail;
-			}
-			.compass {
-				background-image: url(images/bearing/compass.jpg);
-				background-size: contain;
-				width: 100%;
-				max-width: 380px;
-				max-height: 380px;
-				margin: auto;
-				background-repeat: no-repeat;
-			}
-			.compass-arrow {
-				background-image: url(images/bearing/arrow.png);
-				background-size: contain;
-				backbround-repeat: no-repeat;
-				max-width: 380px;
-				max-height: 380px;
-			}
-			.full-message {
-				height: 100%;
-				width: 100%;
-			}
-			.full-message td {
-				text-align: center;
-				font-size: 1.6em;
-				padding: 25px;
-			}
-			.container {
-				height: 100%;
-			}
-			.center {
-				text-align: center;
-			}
-			.pad {
-				padding: 14px;
-			}
-			.pad-left {
-				padding-left: 14px;
-			}
-
-			@media only screen and (orientation: portrait) {
-				.landscape-only {
-					display: none !important;
-				}
-				.image-container {
-					width: 100%;
-					height: 70%;
-					display: block;
-				}
-			}
-			@media only screen and (orientation: landscape) {
-				.portrait-only {
-					display: none !important;
-				}
-				.code-form {
-					position: absolute;
-					top: 0;
-					left: 0;
-					right: 0;
-				}
-			}
-			.code-form {
-				margin-top: 10px;
-			}
-			.image-container {
-				padding: 4px;
-				text-align: center;
-			}
-			.input-container {
-				vertical-align: bottom;
-			}
-			.input-container > div {
-				text-align: center;
-				width: 100%;
-				max-height: 100%;
-			}
-			.container img {
-				border: solid 4px #333;
-			}
-			.responsive img {
-				max-width: 94%;
-				height: auto;
-			}
-			em {
-				font-style: normal;
-				font-weight: bold;
-			}
-			.btn {
-				display: inline-block;
-				margin-bottom: 4px;
-			}
-			.full-image .image-container {
-				padding: 0;
-			}
-			.full-image img {
-				border: none;
-			}
-		</style>
-
-		<script type="text/handlebars" id="point">
-			<div class="image-container responsive"></div>
-			<div class="input-container code-form">
-				<div class="center">
-					<form>
-						<button type="button" class="btn btn-warning landscape-only" onClick="giveUp()">I give up...</button>
-						<input type="number" id="keyCode" pattern="[0-9]*" type="text" name="keyCode" placeholder="Enter Code">
-						<button class="btn btn-primary" type="submit">Check It!</button>
-					</form>
-					<div class="portrait-only">
-						<hr>
-						<button type="button" class="btn btn-warning" onClick="giveUp()">I give up...</button>
-					</div>
-				</div>
-			</div>
-		</script>
-
-		<script type="text/handlebars" id="intro">
-			<div class="pad">
-				<h2 class="center"><%= game.name %></h2>
-				<%= game.description %>
-				<br><br>
-
-				<div class="center">
-					<a class="btn btn-primary btn-lg" href="#current">Let's Go!</a>
-					<br/>
-					<img alt="example" src="images/example.png" style="border: none"/>
-					<br/>
-					Find the markers and enter the codes that you see on them to move on.  Click <strong> Let's Go</strong> to continue.
-				</div>
-			</div>
-		</script>
-
-		<script type="text/handlebars" id="treasure-hunt-start">
-			<div class="image-container responsive"></div>
-			<div class="input-container">
-				<div class="center">
-					<form>
-						<input type="number" id="keyCode" pattern="[0-9]*" type="text" name="keyCode" placeholder="Enter Code">
-						<input class="btn btn-primary" type="submit" value="Enter Code"/>
-					</form>
-					<hr>
-					<button type="button" class="btn btn-warning" onClick="giveUp()">I give up...</button>
-				</div>
-			</div>
-		</script>
-
-		<script type="text/handlebars" id="point-image">
-			<div class="image-container" style="width: auto"></div>
-		</script>
-
-		<script type="text/handlebars" id="bearing">
-			<br>
-			<div class="center">
-				<b>Walk <%= paces %> paces (<%= distance %> feet) <%= direction %>.</b>
-			</div>
-			<br>
-			<div align="center">
-				<div class="compass">
-					<div class="compass-arrow"></div>
-				</div>
-			</div>
-			<br>
-			
-			<div align="center">
-				<form>
-					<button type="button" class="btn btn-warning landscape-only" onClick="giveUp()">I give up...</button>
-					<label for="keyCode">Code</label>
-					<input type="number" id="keyCode" pattern="[0-9]*" type="text" name="keyCode">
-					<button class="btn btn-primary" type="submit">Check It!</button>
-				</form>
-				<div class="portrait-only">
-					<hr>
-					<button type="button" class="btn btn-warning" onClick="giveUp()">I give up...</button>
-				</div>
-			</div>
-		</script>
-
-		<script type="text/handlebars" id="fail">
-			<div class="image-container responsive"></div>
-			<div class="center">
-				<div>
-					<h3>I'm so dissapointed...</h3>
-				</div>
-			</div>
-		</script>
-
-
-		<script type="text/handlebars" id="win">
-			<table width="100%" height="100%" class="full-message"><tr><td valign="middle" align="center">
-					<h2>YOU DID IT!</h2>
-					<h3>And it only took <%= time %></h3>
-					<a href="#settings">Would you like to try another?</a>
-			</td></tr></table>
-			<div class="image-container responsive"></div>
-		</script>
-
-		<script type="text/handlebars" id="settings">
-			<div class="pad">
-				<div class="center">
-					<a class="btn btn-success btn-lg" href="#start"><%= label %></a>
-				</div>
-				<hr>
-
-				<div class="center actions">
-					<h4>Game Style</h4>
-					<button type="button" class="btn btn-default" data-type="game" data-game="satellite">Satellite</button>
-					<button type="button" class="btn btn-default" data-type="game" data-game="perspective">Point of View</button>
-					<!-- button type="button" class="btn btn-default" data-type="game" data-game="bearing">Treasure Map</button -->
-					<p class="game-description"></p>
-					<br>
-
-					<h4>Waypoints</h4>
-					<button type="button" class="btn btn-default" data-type="numSteps" data-numSteps="4">four</button>
-					<button type="button" class="btn btn-default" data-type="numSteps" data-numSteps="6">six</button>
-					<button type="button" class="btn btn-default" data-type="numSteps" data-numSteps="8">eight</button>
-					<button type="button" class="btn btn-default" data-type="numSteps" data-numSteps="10">ten</button>
-					<br><br>
-								
-					<h4>Difficulty</h4>
-					<button type="button" class="btn btn-default" data-type="profile" data-profile="easy">Easy</button>
-					<button type="button" class="btn btn-default" data-type="profile" data-profile="standard">Standard</button>
-					<button type="button" class="btn btn-default" data-type="profile" data-profile="advanced">Advanced</button>
-				</div>
-			</div>
-			<br>
-			<p class="center">
-				<a href="http://goo.gl/8GEKFx">http://goo.gl/8GEKFx</a>
-			</p>
-		</script>
-
-		<script type="text/handlebars" id="message">
-			<br><br><br><br>
-			<table width="100%" height="100%" class="full-message"><tr><td valign="middle" align="center">
-				 <%= message %>
-			</td></tr></table>
-		</script>
-
-	</head>
-
-	<body style="margin: 0">
-			<div class="container"></div>
-	</body>
+  <head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"
+    />
+    <title>Waypoints</title>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://fonts.googleapis.com/css?family=Tangerine"
+    />
+    <style>
+      .app-loading {
+        background-image: url("./images/loading.gif");
+        height: 120px;
+        width: 120px;
+        margin: auto;
+        margin-top: 50%;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app-loading" />
+  </body>
+  <script>
+    waypoints = "./data.js";
+  </script>
+  <script src="app/app.js"></script>
 </html>

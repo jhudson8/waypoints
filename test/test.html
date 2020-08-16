@@ -1,0 +1,136 @@
+<!--
+34.907790, -80.725120
+34.906943, -80.723537
+
+TO FIND
+34.9082515, -80.7236396
+
+TEST
+34.907292, -80.724112
+-->
+
+<html>
+  <head>
+    <style>
+      .image-container {
+        width: 600px;
+        height: 400px;
+        border: solid 1px #ccc;
+        position: relative;
+      }
+      .pointer {
+        background-image: url(./pointer.png);
+        background-size: 25px 25px;
+        background-repeat: no-repeat;
+        width: 25px;
+        height: 25px;
+        position: absolute;
+      }
+    </style>
+    <script>
+      var image = new Image(),
+        images = [],
+        geoWidthDim = 0.00105533333;
+      image.onload = function () {
+        images.push({
+          src: image.src,
+          topLeft: {
+            latitude: 34.90779,
+            longitude: -80.72512,
+          },
+          bottomRight: {
+            latitude: 34.906943,
+            longitude: -80.723537,
+          },
+          width: image.width,
+          height: image.height,
+        });
+        var _img = images[0];
+        _img.geoWidth = Math.abs(
+          _img.topLeft.longitude - _img.bottomRight.longitude
+        );
+        _img.geoHeight = Math.abs(
+          _img.topLeft.latitude - _img.bottomRight.latitude
+        );
+
+        showPoint(
+          { latitude: 34.907292, longitude: -80.724112 },
+          images[0],
+          document.getElementById("imageContainer"),
+          document.getElementById("pointer"),
+          400,
+          600
+        );
+      };
+      image.src = "./test/test-points.png";
+
+      function showPoint(
+        location,
+        image,
+        container,
+        pointerElement,
+        imageHeight,
+        imageWidth
+      ) {
+        // get container in proper proportions
+        var widthMultiplier = image.geoWidth / geoWidthDim;
+        var backgroundSizeWidth = Math.round(imageWidth * widthMultiplier);
+        var geoHeightDim = (geoWidthDim * imageHeight) / imageWidth;
+        var heightMultiplier = image.geoHeight / geoHeightDim;
+        var backgroundSizeHeight = Math.round(imageHeight * heightMultiplier);
+        container.style.backgroundSize =
+          backgroundSizeWidth + "px " + backgroundSizeHeight + "px";
+
+        // position correctly
+        var widthPct =
+          Math.abs(location.longitude - image.topLeft.longitude) /
+          image.geoWidth;
+        var heightPct =
+          Math.abs(location.latitude - image.topLeft.latitude) /
+          image.geoHeight;
+        var pointOnBackground = {
+          x: Math.round(backgroundSizeWidth * widthPct),
+          y: Math.round(backgroundSizeHeight * heightPct),
+        };
+
+        // sanity check point on background
+        var topLeft = {
+          x: pointOnBackground.x - imageWidth / 2,
+          y: pointOnBackground.y - imageHeight / 2,
+        };
+        if (topLeft.x < 0) {
+          topLeft.x = 0;
+        }
+        if (topLeft.x + imageWidth > backgroundSizeWidth) {
+          topLeft.x = backgroundSizeWidth - imageWidth;
+        }
+        if (topLeft.y < 0) {
+          topLeft.y = 0;
+        }
+        if (topLeft.y + imageHeight > backgroundSizeHeight) {
+          topLeft.y = backgroundSizeHeight - imageHeight;
+        }
+
+        container.style.backgroundPosition =
+          "-" + topLeft.x + "px -" + topLeft.y + "px";
+
+        // set the image
+        container.style.backgroundImage = "url(./test/test-points.png)";
+
+        // fix pointer location
+        var pointerX = pointOnBackground.x - topLeft.x - 12;
+        var pointerY = pointOnBackground.y - topLeft.y - 12;
+        pointerElement.style.top = pointerY + "px";
+        pointerElement.style.left = pointerX + "px";
+      }
+      function findBestImage(point) {
+        return images[0];
+      }
+    </script>
+  </head>
+  <body>
+    <div id="imageContainer" class="image-container">
+      <div id="pointer" class="pointer"></div>
+    </div>
+  </body>
+</html>
